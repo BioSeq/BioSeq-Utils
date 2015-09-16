@@ -14,12 +14,28 @@
 
 from sys import argv
 from sys import exit
+import random
 
 def main():
     if len(argv) != 3:
+        print "Wrong number of command-line parameters"
         usage()
 
     validateInput()
+    
+    origRecords = readInFastq(argv[1])
+
+    print len(origRecords)
+    print origRecords[0]
+
+    newRecords = pullNRandRecords(origRecords, int(round(len(origRecords) *\
+                                                float(argv[2]))))
+
+    print len(newRecords)
+    print newRecords[0]
+
+    exit(0)
+
 
 # Prints usage and exits non-zero
 def usage():
@@ -48,6 +64,43 @@ def validateInput():
         print "Second command-line parameter must be a decimal between 0 and 1"
         usage()
 
+
+# Reads in a FASTQ file and returns a list of lists, where each inner list
+# represents one entry in the FASTQ file.
+def readInFastq(fileName):
+    toReturn = []
+    current = []
+    counter = 0
+
+    with open(fileName, 'r') as filer:
+        for line in filer:
+            # Time for new entry
+            if counter % 4 == 0 and counter != 0:
+                toReturn.append(current)
+                current = []
+
+            current.append(line)
+
+            counter += 1
+
+        # Get last entry
+        toReturn.append(current)
+
+    return toReturn
+
+
+# Returns array with n random items from orig array. Assumes that n is
+# less than or equal to len(orig)
+def pullNRandRecords(orig, n):
+    toReturn = []
+
+    # Take care of all randomness
+    random.shuffle(orig)
+
+    for x in range(n):
+        toReturn.append(orig[x])
+
+    return toReturn
 
 
 if __name__ == '__main__':
