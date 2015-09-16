@@ -25,14 +25,10 @@ def main():
     
     origRecords = readInFastq(argv[1])
 
-    print len(origRecords)
-    print origRecords[0]
-
     newRecords = pullNRandRecords(origRecords, int(round(len(origRecords) *\
                                                 float(argv[2]))))
 
-    print len(newRecords)
-    print newRecords[0]
+    writeOut(newRecords, getNewName(argv[1], argv[2]))
 
     exit(0)
 
@@ -101,6 +97,23 @@ def pullNRandRecords(orig, n):
         toReturn.append(orig[x])
 
     return toReturn
+
+
+# Writes out the records to the file name provided
+def writeOut(records, newName):
+    with open(newName, 'w') as filew:
+        for r in records:
+            for x in r:
+                filew.write(x)
+
+    print "Done"
+    print "New FASTQ written to", newName,
+
+
+# Generates the name of the new file
+def getNewName(oldName, dec):
+    nL = oldName.split(".")
+    return nL[0] + "_" + dec.split(".")[1] + "." + nL[1]
 
 
 if __name__ == '__main__':
