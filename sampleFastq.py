@@ -19,10 +19,36 @@ def main():
     if len(argv) != 3:
         usage()
 
+    validateInput()
+
 # Prints usage and exits non-zero
 def usage():
-    print "USAGE:", argv[0], "input_fastq percent_to_keep"
+    print "USAGE:", argv[0], "input_fastq decimal_to_keep"
     exit(1)
+
+
+# Makes sure the first command-line argument is a fastq file, and the second
+# is a decimal between 0 and 1. Otherwise calls usage (thus exits non-zero)
+def validateInput():
+    # Validate FASTQ
+    if not argv[1].endswith(".fastq"):
+        print argv[1], "is not a valid FASTQ file."
+        print "First command-line parameter must be a FASTQ file"
+        usage()
+
+    # Validate decimal
+    try:
+        dec = float(argv[2])
+    except ValueError:
+        print argv[2], "is not an appropriate decimal (illegal characters)"
+        print "Second command-line parameter must be a decimal between 0 and 1"
+        usage()
+    if dec < 0 or dec > 1:
+        print dec, "is not an appropriate decimal"
+        print "Second command-line parameter must be a decimal between 0 and 1"
+        usage()
+
+
 
 if __name__ == '__main__':
     main()
