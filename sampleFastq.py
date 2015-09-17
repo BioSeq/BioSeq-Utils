@@ -22,15 +22,11 @@ def main():
         usage()
 
     validateInput()
-    
-    origRecords = readInFastq(argv[1])
 
-    newRecords = pullNRandRecords(origRecords, int(round(len(origRecords) *\
-                                                float(argv[2]))))
-
-    writeOut(newRecords, getNewName(argv[1], argv[2]))
+    makeSampleFastq(argv[1], getNewName(argv[1], argv[2]), float(argv[2]))
 
     exit(0)
+    
 
 
 # Prints usage and exits non-zero
@@ -61,59 +57,32 @@ def validateInput():
         usage()
 
 
-# Reads in a FASTQ file and returns a list of lists, where each inner list
-# represents one entry in the FASTQ file.
-def readInFastq(fileName):
-    toReturn = []
-    current = []
-    counter = 0
-
-    with open(fileName, 'r') as filer:
-        for line in filer:
-            # Time for new entry
-            if counter % 4 == 0 and counter != 0:
-                toReturn.append(current)
-                current = []
-
-            current.append(line)
-
-            counter += 1
-
-        # Get last entry
-        toReturn.append(current)
-
-    return toReturn
-
-
-# Returns array with n random items from orig array. Assumes that n is
-# less than or equal to len(orig)
-def pullNRandRecords(orig, n):
-    toReturn = []
-
-    # Take care of all randomness
-    random.shuffle(orig)
-
-    for x in range(n):
-        toReturn.append(orig[x])
-
-    return toReturn
-
-
-# Writes out the records to the file name provided
-def writeOut(records, newName):
-    with open(newName, 'w') as filew:
-        for r in records:
-            for x in r:
-                filew.write(x)
-
-    print "Done"
-    print "New FASTQ written to", newName,
-
-
 # Generates the name of the new file
 def getNewName(oldName, dec):
     nL = oldName.split(".")
     return nL[0] + "_" + dec.split(".")[1] + "." + nL[1]
+
+
+# Writes dec percentage of oldFile FASTQ entries into newFile
+def makeSampleFastq(oldFile, newFile, dec):
+    n = 0
+    keep = False
+
+    filew = open(newFile, 'w')
+    with open(oldFile, 'r') as filer:
+        for line in filer:
+            if n % 4 == 0:
+                if random.random() < dec:  # hit!
+                    keep = True
+                else:
+                    keep = False
+
+            if keep:
+                filew.write(line)
+
+            n += 1
+        
+    filew.close()
 
 
 if __name__ == '__main__':
